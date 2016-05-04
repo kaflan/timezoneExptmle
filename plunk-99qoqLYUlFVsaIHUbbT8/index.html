@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <link data-require="bootstrap-css@3.3.6" data-semver="3.3.6" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css" />
+    <link rel="stylesheet" href="https://rawgit.com/mishguruorg/angular-timezone-selector/master/dist/angular-timezone-selector.css" />
+    <link href="style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body ng-app="demoApp">
+    <h1 class="header">Angular Timezone Selector Demo</h1>
+    <div ng-controller="AppCtrl" class="demo">
+        <h3>Selected timezone:         <b>{{timezone}}</b></h3>
+        <timezone-selector ng-model="timezone" display-utc="true"></timezone-selector>
+        <button class="btn btn-primary" ng-click="addTimeZone(timezone)" ng-disabled="!timezone"> Add </button>
+        <br>
+        <br>
+        <input type="text" class="form-control" ng-model="searh" placeholder="searh town" />
+        <br>
+        <div>
+            <div ng-repeat="city in cityTymes | filter: searh track by $index">
+                <p>
+                    city :{{city.location}}
+                </p>
+                <p>
+                    timezone :{{city.zone}}
+                </p>
+                <p>
+                    date : {{city.date| date }}
+                </p>
+                <button type="button" class="btn btn-default" name="button" ng-click="edit($index)">Edit</button>
+                <button class="btn btn-danger" ng-click="delete($index, city)">Delete</button>
+            </div>
+        </div>
+    </div>
+    <!-- JS Dependancies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.0/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.4.2/chosen.jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.8/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstimezonedetect/1.0.6/jstz.min.js"></script>
+    <script src="https://code.angularjs.org/1.4.3/angular-touch.js" charset="utf-8"></script>
+    <script src="https://code.angularjs.org/1.5.3/angular-animate.js" charset="utf-8"></script>
+    <script src="https://rawgit.com/mishguruorg/angular-timezone-selector/master/dist/angular-timezone-selector.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/1.1.2/ui-bootstrap-tpls.js" charset="utf-8"></script>
+    <script src="sweetAlert.js"></script>
+    <script src="sweetAlert.min.js"></script>
+    <!-- Basic example app -->
+    <script>
+        var app = angular.module('demoApp', ['angular-timezone-selector', 'oitozero.ngSweetAlert', 'ui.bootstrap'])
+        app.controller('AppCtrl', ['$scope', 'SweetAlert', '$uibModal', function($scope, SweetAlert, $uibModal) {
+            $scope.timezone = ''
+            $scope.cityTymes = [];
+            $scope.addTimeZone = function(input) {
+                $scope.city = {
+                    location: input,
+                    zone: moment().tz(input).format('Z'),
+                    date: moment().format()
+                };
+                $scope.cityTymes.push($scope.city);
+            };
+            $scope.delete = function($index) {
+                SweetAlert.swal({
+                        title: "Are you sure?",
+                        text: "Your will not be able to recover this imaginary file!",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Yes, delete it!",
+                        cancelButtonText: "No, cancel plx!",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    },
+                    function(isConfirm) {
+                        if (isConfirm) {
+                            $scope.cityTymes.splice($index, 1);
+                            SweetAlert.swal("Deleted!", "Your imaginary file has been deleted.", "success");
+                        } else {
+                            SweetAlert.swal("Cancelled", "Your imaginary file is safe :)", "error");
+                        }
+                    });
+            };
+            $scope.edit = function($index, city) {
+                $uibModal.open({
+                    controller: [
+                        '$scope',
+                        function($scope) {
+                            var $ctrl = this;
+                            $ctrl.city = city;
+                            $ctrl.save = function() {
+                                $scope.cityTymes[index] = $ctrl.city;
+                            }
+                        }
+                    ],
+                    controllerAs: '$ctrl',
+                    bindToController: true,
+                    template: '<form>' +
+                        '<div class="form-group">' +
+                        '<input  type="text" class="form-control" id="exampleInputEmail1" placeholder="City" ng-model="$ctrl.city.location">' +
+                        '<input  type="text" class="form-control" id="exampleInputEmail1" placeholder="City" ng-model="$ctrl.city.zone">' +
+                        '<button type="text" class="btn btn-primary" ng-click="$ctrl.save()">Save</button>' +
+                        '</div>' +
+                        '</form>'
+                })
+            }
+        }])
+    </script>
+</body>
+
+</html>
